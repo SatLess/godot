@@ -3519,6 +3519,14 @@ static void _find_call_arguments(GDScriptParser::CompletionContext &p_context, c
 			while (native_type.is_set() && native_type.kind != GDScriptParser::DataType::NATIVE) {
 				switch (native_type.kind) {
 					case GDScriptParser::DataType::CLASS: {
+						for(const GDScriptParser::ClassNode::Member &member : native_type.class_type->members){
+							if(member.type == GDScriptParser::ClassNode::Member::FUNCTION){
+								String display_name = member.function->identifier->name;
+								display_name += member.function->signature;
+								ScriptLanguage::CodeCompletionOption option(display_name, ScriptLanguage::CODE_COMPLETION_KIND_FUNCTION);
+								options.insert(option.display, option);
+							};
+						}
 						native_type = native_type.class_type->base_type;
 					} break;
 					default: {
