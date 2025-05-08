@@ -1929,7 +1929,7 @@ static String _quote_drop_data(const String &str) {
 	return escaped.quote(using_single_quotes ? "'" : "\"");
 }
 
-static String _get_dropped_resource_line_str(const Ref<Resource> &p_resource, bool p_create_field, bool p_allow_uid) {
+static String _get_dropped_resource_str_line(const Ref<Resource> &p_resource, bool p_create_field, bool p_allow_uid) {
 	String path = p_resource->get_path();
 	if (p_allow_uid) {
 		ResourceUID::ID id = ResourceLoader::get_resource_uid(path);
@@ -1956,7 +1956,7 @@ static String _get_dropped_resource_line_str(const Ref<Resource> &p_resource, bo
 	return vformat("const %s = preload(%s)", variable_name, _quote_drop_data(path));
 }
 
-String ScriptTextEditor::_get_dropped_resource_line_ref(const Ref<Resource> &p_resource) {
+String ScriptTextEditor::_get_dropped_resource_ref_line(const Ref<Resource> &p_resource) {
 	String variable_name = p_resource->get_name();
 	if (variable_name.is_empty()) {
 		variable_name = p_resource->get_path().get_file().get_basename();
@@ -2023,10 +2023,10 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 				String warning = TTR("Preloading internal resources is not supported.");
 				EditorToaster::get_singleton()->popup_str(warning, EditorToaster::SEVERITY_ERROR);
 			} else {
-				text_to_drop = _get_dropped_resource_line_str(resource, is_empty_line, allow_uid);
+				text_to_drop = _get_dropped_resource_str_line(resource, is_empty_line, allow_uid);
 			}
 		} else if (ref_drop_modifier_pressed) {
-			text_to_drop = _get_dropped_resource_line_ref(resource);
+			text_to_drop = _get_dropped_resource_ref_line(resource);
 		} else {
 			text_to_drop = _quote_drop_data(path);
 		}
@@ -2045,9 +2045,9 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 				}
 
 				if (str_drop_modifier_pressed) {
-					parts.append(_get_dropped_resource_line_str(resource, is_empty_line, allow_uid));
+					parts.append(_get_dropped_resource_str_line(resource, is_empty_line, allow_uid));
 				} else if (ref_drop_modifier_pressed) {
-					parts.append(_get_dropped_resource_line_ref(resource));
+					parts.append(_get_dropped_resource_ref_line(resource));
 				}
 			} else {
 				parts.append(_quote_drop_data(path));
