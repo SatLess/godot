@@ -71,6 +71,7 @@ class ScriptTextEditor : public ScriptEditorBase {
 	HashSet<int> safe_lines;
 
 	List<Connection> missing_connections;
+	HashMap<String, Node *> export_node_refs;
 
 	Vector<String> member_keywords;
 
@@ -173,6 +174,7 @@ protected:
 	void _update_warnings();
 	void _update_errors();
 	void _update_bookmark_list();
+	void _assign_dragged_export_variables();
 	void _bookmark_item_pressed(int p_idx);
 
 	static void _code_complete_scripts(void *p_ud, const String &p_code, List<ScriptLanguage::CodeCompletionOption> *r_options, bool &r_force);

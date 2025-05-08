@@ -575,6 +575,7 @@ void ScriptTextEditor::_validate_script() {
 		script_is_valid = true;
 	}
 	_update_connected_methods();
+	_assign_dragged_export_variables();
 	_update_errors();
 	_update_warnings();
 
@@ -2119,6 +2120,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 					}
 				}
 				text_to_drop += vformat("@export var %s: %s\n", variable_name, class_name);
+				export_node_refs.insert(variable_name, node);
 			}
 		} else {
 			for (int i = 0; i < nodes.size(); i++) {
@@ -2177,6 +2179,36 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 	te->insert_text_at_caret(text_to_drop);
 	te->end_complex_operation();
 	te->grab_focus();
+}
+
+void ScriptTextEditor::_assign_dragged_export_variables() {
+	if (export_node_refs.size() == 0) {
+		return;
+	}
+
+	Node *scene_root = get_tree()->get_edited_scene_root();
+	if (!scene_root) {
+		EditorNode::get_singleton()->show_warning(TTR("Can't drop nodes without an open scene."));
+		return;
+	}
+
+	if (!ClassDB::is_parent_class(script->get_instance_base_type(), "Node")) {
+		EditorToaster::get_singleton()->popup_str(vformat(TTR("Can't drop nodes because script '%s' does not inherit Node."), get_name()), EditorToaster::SEVERITY_WARNING);
+		return;
+	}
+
+	Node *sn = _find_script_node(scene_root, scene_root, script);
+	if (!sn) {
+		sn = scene_root;
+	}
+
+	HashMap<String, Node *>::Iterator el = export_node_refs.begin();
+	while (el) {
+		sn->set(el->key, Variant(el->value));
+		++el;
+	}
+
+	export_node_refs.clear();
 }
 
 void ScriptTextEditor::_text_edit_gui_input(const Ref<InputEvent> &ev) {
