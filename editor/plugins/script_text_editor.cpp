@@ -1975,7 +1975,7 @@ String ScriptTextEditor::_get_dropped_resource_ref_line(const Ref<Resource> &p_r
 	variable_name = variable_name.to_snake_case().validate_unicode_identifier();
 	dirty_export_refs.insert(variable_name, Variant(p_resource));
 
-	return vformat("@export var %s: %s\n", variable_name, class_name);
+	return vformat("@export var %s: %s", variable_name, class_name);
 }
 
 void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
