@@ -174,8 +174,10 @@ protected:
 	void _update_warnings();
 	void _update_errors();
 	void _update_bookmark_list();
-	void _assign_dragged_export_variables();
 	void _bookmark_item_pressed(int p_idx);
+
+	void _assign_dragged_export_variables();
+	String _get_dropped_resource_line_ref(const Ref<Resource> &p_resource);
 
 	static void _code_complete_scripts(void *p_ud, const String &p_code, List<ScriptLanguage::CodeCompletionOption> *r_options, bool &r_force);
 	void _code_complete_script(const String &p_code, List<ScriptLanguage::CodeCompletionOption> *r_options, bool &r_force);

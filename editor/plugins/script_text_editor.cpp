@@ -1929,7 +1929,7 @@ static String _quote_drop_data(const String &str) {
 	return escaped.quote(using_single_quotes ? "'" : "\"");
 }
 
-static String _get_dropped_resource_line(const Ref<Resource> &p_resource, bool p_create_field, bool p_allow_uid) {
+static String _get_dropped_resource_line_str(const Ref<Resource> &p_resource, bool p_create_field, bool p_allow_uid) {
 	String path = p_resource->get_path();
 	if (p_allow_uid) {
 		ResourceUID::ID id = ResourceLoader::get_resource_uid(path);
@@ -1954,6 +1954,28 @@ static String _get_dropped_resource_line(const Ref<Resource> &p_resource, bool p
 		variable_name = variable_name.to_snake_case().to_upper().validate_unicode_identifier();
 	}
 	return vformat("const %s = preload(%s)", variable_name, _quote_drop_data(path));
+}
+
+String ScriptTextEditor::_get_dropped_resource_line_ref(const Ref<Resource> &p_resource) {
+	String variable_name = p_resource->get_name();
+	if (variable_name.is_empty()) {
+		variable_name = p_resource->get_path().get_file().get_basename();
+	}
+
+	StringName class_name = p_resource->get_class();
+	Ref<Script> resource_script = p_resource->get_script();
+
+	if (resource_script.is_valid()) {
+		StringName global_resource_script_name = resource_script->get_global_name();
+		if (global_resource_script_name != StringName()) {
+			class_name = global_resource_script_name;
+		}
+	}
+
+	variable_name = variable_name.to_snake_case().validate_unicode_identifier();
+	dirty_export_refs.insert(variable_name, Variant(p_resource));
+
+	return vformat("@export var %s: %s\n", variable_name, class_name);
 }
 
 void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
@@ -2001,8 +2023,10 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 				String warning = TTR("Preloading internal resources is not supported.");
 				EditorToaster::get_singleton()->popup_str(warning, EditorToaster::SEVERITY_ERROR);
 			} else {
-				text_to_drop = _get_dropped_resource_line(resource, is_empty_line, allow_uid);
+				text_to_drop = _get_dropped_resource_line_str(resource, is_empty_line, allow_uid);
 			}
+		} else if (ref_drop_modifier_pressed) {
+			text_to_drop = _get_dropped_resource_line_ref(resource);
 		} else {
 			text_to_drop = _quote_drop_data(path);
 		}
@@ -2013,14 +2037,18 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 		PackedStringArray parts;
 
 		for (const String &path : files) {
-			if (str_drop_modifier_pressed && ResourceLoader::exists(path)) {
+			if (ResourceLoader::exists(path)) {
 				Ref<Resource> resource = ResourceLoader::load(path);
 				if (resource.is_null()) {
-					// Resource exists, but failed to load. We need only path and name, so we can use a dummy Resource instead.
 					resource.instantiate();
 					resource->set_path_cache(path);
 				}
-				parts.append(_get_dropped_resource_line(resource, is_empty_line, allow_uid));
+
+				if (str_drop_modifier_pressed) {
+					parts.append(_get_dropped_resource_line_str(resource, is_empty_line, allow_uid));
+				} else if (ref_drop_modifier_pressed) {
+					parts.append(_get_dropped_resource_line_ref(resource));
+				}
 			} else {
 				parts.append(_quote_drop_data(path));
 			}
