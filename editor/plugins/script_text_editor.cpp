@@ -2120,7 +2120,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 					}
 				}
 				text_to_drop += vformat("@export var %s: %s\n", variable_name, class_name);
-				export_node_refs.insert(variable_name, node);
+				dirty_export_refs.insert(variable_name, Variant(node));
 			}
 		} else {
 			for (int i = 0; i < nodes.size(); i++) {
@@ -2182,7 +2182,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 }
 
 void ScriptTextEditor::_assign_dragged_export_variables() {
-	if (export_node_refs.size() == 0) {
+	if (dirty_export_refs.size() == 0) {
 		return;
 	}
 
@@ -2202,13 +2202,13 @@ void ScriptTextEditor::_assign_dragged_export_variables() {
 		sn = scene_root;
 	}
 
-	HashMap<String, Node *>::Iterator el = export_node_refs.begin();
+	HashMap<String, Variant>::Iterator el = dirty_export_refs.begin();
 	while (el) {
-		sn->set(el->key, Variant(el->value));
+		sn->set(el->key, el->value);
 		++el;
 	}
 
-	export_node_refs.clear();
+	dirty_export_refs.clear();
 }
 
 void ScriptTextEditor::_text_edit_gui_input(const Ref<InputEvent> &ev) {

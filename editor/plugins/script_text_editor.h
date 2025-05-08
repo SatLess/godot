@@ -71,7 +71,7 @@ class ScriptTextEditor : public ScriptEditorBase {
 	HashSet<int> safe_lines;
 
 	List<Connection> missing_connections;
-	HashMap<String, Node *> export_node_refs;
+	HashMap<String, Variant> dirty_export_refs; // for drag-n-dropped export variables
 
 	Vector<String> member_keywords;
 
