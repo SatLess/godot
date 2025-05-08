@@ -1974,7 +1974,9 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 
 	String text_to_drop;
 
-	const bool drop_modifier_pressed = Input::get_singleton()->is_key_pressed(Key::CMD_OR_CTRL);
+	const bool str_drop_modifier_pressed = Input::get_singleton()->is_key_pressed(Key::CMD_OR_CTRL);
+	const bool ref_drop_modifier_pressed = Input::get_singleton()->is_key_pressed(Key::ALT);
+
 	const bool allow_uid = Input::get_singleton()->is_key_pressed(Key::SHIFT) != bool(EDITOR_GET("text_editor/behavior/files/drop_preload_resources_as_uid"));
 	const String &line = te->get_line(drop_at_line);
 	const bool is_empty_line = line_will_be_empty || line.is_empty() || te->get_first_non_whitespace_column(drop_at_line) == line.length();
@@ -1993,7 +1995,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 			return;
 		}
 
-		if (drop_modifier_pressed) {
+		if (str_drop_modifier_pressed) {
 			if (resource->is_built_in()) {
 				String warning = TTR("Preloading internal resources is not supported.");
 				EditorToaster::get_singleton()->popup_str(warning, EditorToaster::SEVERITY_ERROR);
@@ -2010,7 +2012,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 		PackedStringArray parts;
 
 		for (const String &path : files) {
-			if (drop_modifier_pressed && ResourceLoader::exists(path)) {
+			if (str_drop_modifier_pressed && ResourceLoader::exists(path)) {
 				Ref<Resource> resource = ResourceLoader::load(path);
 				if (resource.is_null()) {
 					// Resource exists, but failed to load. We need only path and name, so we can use a dummy Resource instead.
@@ -2044,7 +2046,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 
 		Array nodes = d["nodes"];
 
-		if (drop_modifier_pressed) {
+		if (str_drop_modifier_pressed) {
 			const bool use_type = EDITOR_GET("text_editor/completion/add_type_hints");
 
 			for (int i = 0; i < nodes.size(); i++) {
@@ -2083,6 +2085,40 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 				} else {
 					text_to_drop += vformat("@onready var %s = %c%s\n", variable_name, is_unique ? '%' : '$', path);
 				}
+			}
+		} else if (ref_drop_modifier_pressed) {
+			for (int i = 0; i < nodes.size(); i++) {
+				NodePath np = nodes[i];
+				Node *node = get_node(np);
+				if (!node) {
+					continue;
+				}
+
+				bool is_unique = false;
+				String path;
+				if (node->is_unique_name_in_owner()) {
+					path = node->get_name();
+					is_unique = true;
+				} else {
+					path = sn->get_path_to(node);
+				}
+				for (const String &segment : path.split("/")) {
+					if (!segment.is_valid_unicode_identifier()) {
+						path = _quote_drop_data(path);
+						break;
+					}
+				}
+
+				String variable_name = String(node->get_name()).to_snake_case().validate_unicode_identifier();
+				StringName class_name = node->get_class_name();
+				Ref<Script> node_script = node->get_script();
+				if (node_script.is_valid()) {
+					StringName global_node_script_name = node_script->get_global_name();
+					if (global_node_script_name != StringName()) {
+						class_name = global_node_script_name;
+					}
+				}
+				text_to_drop += vformat("@export var %s: %s\n", variable_name, class_name);
 			}
 		} else {
 			for (int i = 0; i < nodes.size(); i++) {
