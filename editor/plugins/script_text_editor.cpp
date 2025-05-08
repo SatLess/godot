@@ -2123,21 +2123,6 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 					continue;
 				}
 
-				bool is_unique = false;
-				String path;
-				if (node->is_unique_name_in_owner()) {
-					path = node->get_name();
-					is_unique = true;
-				} else {
-					path = sn->get_path_to(node);
-				}
-				for (const String &segment : path.split("/")) {
-					if (!segment.is_valid_unicode_identifier()) {
-						path = _quote_drop_data(path);
-						break;
-					}
-				}
-
 				String variable_name = String(node->get_name()).to_snake_case().validate_unicode_identifier();
 				StringName class_name = node->get_class_name();
 				Ref<Script> node_script = node->get_script();
@@ -2147,6 +2132,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 						class_name = global_node_script_name;
 					}
 				}
+
 				text_to_drop += vformat("@export var %s: %s\n", variable_name, class_name);
 				dirty_export_refs.insert(variable_name, Variant(node));
 			}
