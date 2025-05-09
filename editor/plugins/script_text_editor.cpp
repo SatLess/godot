@@ -2037,7 +2037,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 		PackedStringArray parts;
 
 		for (const String &path : files) {
-			if (ResourceLoader::exists(path)) {
+			if (ResourceLoader::exists(path) and (member_drop_modifier_pressed || export_drop_modifier_pressed)) {
 				Ref<Resource> resource = ResourceLoader::load(path);
 				if (resource.is_null()) {
 					resource.instantiate();
