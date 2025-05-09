@@ -234,6 +234,8 @@ void ImageTexture::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_size_override", "size"), &ImageTexture::set_size_override);
 }
 
+ImageTexture::ImageTexture() {}
+
 ImageTexture::~ImageTexture() {
 	if (texture.is_valid()) {
 		ERR_FAIL_NULL(RenderingServer::get_singleton());

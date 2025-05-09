@@ -183,9 +183,7 @@ static void handle_crash(int sig) {
 	}
 	if (!script_backtraces.is_empty()) {
 		for (const Ref<ScriptBacktrace> &backtrace : script_backtraces) {
-			if (!backtrace->is_empty()) {
-				print_error(backtrace->format());
-			}
+			print_error(backtrace->format());
 		}
 		print_error("-- END OF SCRIPT BACKTRACE --");
 		print_error("================================================================");

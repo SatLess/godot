@@ -143,9 +143,7 @@ void WindowsTerminalLogger::log_error(const char *p_function, const char *p_file
 		}
 
 		for (const Ref<ScriptBacktrace> &backtrace : p_script_backtraces) {
-			if (!backtrace->is_empty()) {
-				logf_error("%s\n", backtrace->format(strlen(indent)).utf8().get_data());
-			}
+			logf_error("%s\n", backtrace->format(strlen(indent)).utf8().get_data());
 		}
 
 		SetConsoleTextAttribute(hCon, sbi.wAttributes);

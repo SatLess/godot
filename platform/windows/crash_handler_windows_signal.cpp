@@ -191,9 +191,7 @@ extern void CrashHandlerException(int signal) {
 	}
 	if (!script_backtraces.is_empty()) {
 		for (const Ref<ScriptBacktrace> &backtrace : script_backtraces) {
-			if (!backtrace->is_empty()) {
-				print_error(backtrace->format());
-			}
+			print_error(backtrace->format());
 		}
 		print_error("-- END OF SCRIPT BACKTRACE --");
 		print_error("================================================================");

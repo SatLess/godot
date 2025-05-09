@@ -426,6 +426,10 @@ void AudioStreamPlaybackWAV::set_sample_playback(const Ref<AudioSamplePlayback> 
 	}
 }
 
+AudioStreamPlaybackWAV::AudioStreamPlaybackWAV() {}
+
+AudioStreamPlaybackWAV::~AudioStreamPlaybackWAV() {}
+
 /////////////////////
 
 void AudioStreamWAV::set_format(Format p_format) {
@@ -1152,3 +1156,7 @@ void AudioStreamWAV::_bind_methods() {
 	BIND_ENUM_CONSTANT(LOOP_PINGPONG);
 	BIND_ENUM_CONSTANT(LOOP_BACKWARD);
 }
+
+AudioStreamWAV::AudioStreamWAV() {}
+
+AudioStreamWAV::~AudioStreamWAV() {}

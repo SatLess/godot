@@ -909,6 +909,7 @@ public:
 
 	void _validate_property(PropertyInfo &p_property) const;
 	SubViewport();
+	~SubViewport();
 };
 VARIANT_ENUM_CAST(Viewport::Scaling3DMode);
 VARIANT_ENUM_CAST(SubViewport::UpdateMode);

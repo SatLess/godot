@@ -61,6 +61,8 @@ public:
 		Vector<float> weights;
 
 		bool operator==(const Vertex &p_vertex) const;
+
+		Vertex() {}
 	};
 
 	enum CustomFormat {

@@ -245,3 +245,5 @@ void Timer::_bind_methods() {
 	BIND_ENUM_CONSTANT(TIMER_PROCESS_PHYSICS);
 	BIND_ENUM_CONSTANT(TIMER_PROCESS_IDLE);
 }
+
+Timer::Timer() {}
