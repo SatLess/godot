@@ -3266,9 +3266,11 @@ static void _find_call_arguments(GDScriptParser::CompletionContext &p_context, c
 ::Error GDScriptLanguage::complete_code(const String &p_code, const String &p_path, Object *p_owner, List<ScriptLanguage::CodeCompletionOption> *r_options, bool &r_forced, String &r_call_hint) {
 	const String quote_style = EDITOR_GET("text_editor/completion/use_single_quotes") ? "'" : "\"";
 
+	GDScriptTokenizerText tokenizer;
 	GDScriptParser parser;
 	GDScriptAnalyzer analyzer(&parser);
 
+	tokenizer.set_source_code(p_code);
 	parser.parse(p_code, p_path, true);
 	analyzer.analyze();
 
@@ -3519,13 +3521,18 @@ static void _find_call_arguments(GDScriptParser::CompletionContext &p_context, c
 			while (native_type.is_set() && native_type.kind != GDScriptParser::DataType::NATIVE) {
 				switch (native_type.kind) {
 					case GDScriptParser::DataType::CLASS: {
-						for(const GDScriptParser::ClassNode::Member &member : native_type.class_type->members){
-							if(member.type == GDScriptParser::ClassNode::Member::FUNCTION){
-								String display_name = member.function->identifier->name;
-								display_name += member.function->signature;
-								ScriptLanguage::CodeCompletionOption option(display_name, ScriptLanguage::CODE_COMPLETION_KIND_FUNCTION);
-								options.insert(option.display, option);
-							};
+						for (const GDScriptParser::ClassNode::Member &member : native_type.class_type->members) {
+							if (member.type != GDScriptParser::ClassNode::Member::FUNCTION) {
+								continue;
+							}
+							if (options.has(member.function->identifier->name) || completion_context.current_class->has_function(member.function->identifier->name)) {
+								continue;
+							}
+
+							String display_name = member.function->identifier->name;
+							display_name += member.function->signature;
+							ScriptLanguage::CodeCompletionOption option(display_name, ScriptLanguage::CODE_COMPLETION_KIND_FUNCTION);
+							options.insert(member.function->identifier->name, option); // Insert name instead of display to track duplicates.
 						}
 						native_type = native_type.class_type->base_type;
 					} break;
@@ -3558,6 +3565,9 @@ static void _find_call_arguments(GDScriptParser::CompletionContext &p_context, c
 			}
 
 			for (const MethodInfo &mi : virtual_methods) {
+				if (options.has(mi.name) || completion_context.current_class->has_function(mi.name)) {
+					continue;
+				}
 				String method_hint = mi.name;
 				if (method_hint.contains_char(':')) {
 					method_hint = method_hint.get_slicec(':', 0);

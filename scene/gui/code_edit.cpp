@@ -3523,6 +3523,11 @@ void CodeEdit::_filter_code_completion_candidates_impl() {
 			cofs--;
 		}
 		string_to_complete = line.substr(cofs, start_cofs - cofs);
+		/* Prevent user-defined methods from checking against a keyword. */
+		if (string_to_complete == "func") {
+			cancel_code_completion();
+			return;
+		}
 	}
 
 	/* If all else fails, check for a prefix.         */
