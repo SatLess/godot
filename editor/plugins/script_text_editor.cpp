@@ -1928,7 +1928,7 @@ static String _quote_drop_data(const String &str) {
 	return escaped.quote(using_single_quotes ? "'" : "\"");
 }
 
-static String _get_dropped_resource_str_line(const Ref<Resource> &p_resource, bool p_create_field, bool p_allow_uid) {
+static String _get_dropped_resource_as_member(const Ref<Resource> &p_resource, bool p_create_field, bool p_allow_uid) {
 	String path = p_resource->get_path();
 	if (p_allow_uid) {
 		ResourceUID::ID id = ResourceLoader::get_resource_uid(path);
@@ -1955,7 +1955,7 @@ static String _get_dropped_resource_str_line(const Ref<Resource> &p_resource, bo
 	return vformat("const %s = preload(%s)", variable_name, _quote_drop_data(path));
 }
 
-static String _get_dropped_resource_ref_line(const Ref<Resource> &p_resource, Dictionary &p_dragged_export_refs) {
+static String _get_dropped_resource_as_exported_member(const Ref<Resource> &p_resource, Dictionary &p_dragged_export_refs) {
 	String variable_name = p_resource->get_name();
 	if (variable_name.is_empty()) {
 		variable_name = p_resource->get_path().get_file().get_basename();
@@ -1997,8 +1997,8 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 	String text_to_drop;
 	Dictionary dragged_export_refs;
 
-	const bool str_drop_modifier_pressed = Input::get_singleton()->is_key_pressed(Key::CMD_OR_CTRL);
-	const bool ref_drop_modifier_pressed = Input::get_singleton()->is_key_pressed(Key::ALT);
+	const bool member_drop_modifier_pressed = Input::get_singleton()->is_key_pressed(Key::CMD_OR_CTRL);
+	const bool export_drop_modifier_pressed = Input::get_singleton()->is_key_pressed(Key::ALT);
 
 	const bool allow_uid = Input::get_singleton()->is_key_pressed(Key::SHIFT) != bool(EDITOR_GET("text_editor/behavior/files/drop_preload_resources_as_uid"));
 	const String &line = te->get_line(drop_at_line);
@@ -2018,15 +2018,15 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 			return;
 		}
 
-		if (str_drop_modifier_pressed) {
+		if (member_drop_modifier_pressed) {
 			if (resource->is_built_in()) {
 				String warning = TTR("Preloading internal resources is not supported.");
 				EditorToaster::get_singleton()->popup_str(warning, EditorToaster::SEVERITY_ERROR);
 			} else {
-				text_to_drop = _get_dropped_resource_str_line(resource, is_empty_line, allow_uid);
+				text_to_drop = _get_dropped_resource_as_member(resource, is_empty_line, allow_uid);
 			}
-		} else if (ref_drop_modifier_pressed) {
-			text_to_drop = _get_dropped_resource_ref_line(resource, dragged_export_refs);
+		} else if (export_drop_modifier_pressed) {
+			text_to_drop = _get_dropped_resource_as_exported_member(resource, dragged_export_refs);
 		} else {
 			text_to_drop = _quote_drop_data(path);
 		}
@@ -2044,9 +2044,9 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 					resource->set_path_cache(path);
 				}
 
-				if (str_drop_modifier_pressed) {
-					parts.append(_get_dropped_resource_str_line(resource, is_empty_line, allow_uid));
-				} else if (ref_drop_modifier_pressed) {
+				if (member_drop_modifier_pressed) {
+					parts.append(_get_dropped_resource_as_member(resource, is_empty_line, allow_uid));
+				} else if (export_drop_modifier_pressed) {
 					Node *scene_root = get_tree()->get_edited_scene_root();
 					if (!scene_root) {
 						EditorNode::get_singleton()->show_warning(TTR("Can't assign @export variables without an open scene."));
@@ -2058,7 +2058,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 						return;
 					}
 
-					parts.append(_get_dropped_resource_ref_line(resource, dragged_export_refs));
+					parts.append(_get_dropped_resource_as_exported_member(resource, dragged_export_refs));
 				}
 			} else {
 				parts.append(_quote_drop_data(path));
@@ -2086,7 +2086,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 
 		Array nodes = d["nodes"];
 
-		if (str_drop_modifier_pressed) {
+		if (member_drop_modifier_pressed) {
 			const bool use_type = EDITOR_GET("text_editor/completion/add_type_hints");
 
 			for (int i = 0; i < nodes.size(); i++) {
@@ -2126,7 +2126,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 					text_to_drop += vformat("@onready var %s = %c%s\n", variable_name, is_unique ? '%' : '$', path);
 				}
 			}
-		} else if (ref_drop_modifier_pressed) {
+		} else if (export_drop_modifier_pressed) {
 			for (int i = 0; i < nodes.size(); i++) {
 				NodePath np = nodes[i];
 				Node *node = get_node(np);
