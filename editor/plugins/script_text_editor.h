@@ -71,7 +71,6 @@ class ScriptTextEditor : public ScriptEditorBase {
 	HashSet<int> safe_lines;
 
 	List<Connection> missing_connections;
-	HashMap<String, Variant> dirty_export_refs; // for drag-n-dropped export variables
 
 	Vector<String> member_keywords;
 
@@ -176,8 +175,7 @@ protected:
 	void _update_bookmark_list();
 	void _bookmark_item_pressed(int p_idx);
 
-	void _assign_dragged_export_variables();
-	String _get_dropped_resource_ref_line(const Ref<Resource> &p_resource);
+	void _assign_dragged_export_variables(const Dictionary &p_dragged_export_refs);
 
 	static void _code_complete_scripts(void *p_ud, const String &p_code, List<ScriptLanguage::CodeCompletionOption> *r_options, bool &r_force);
 	void _code_complete_script(const String &p_code, List<ScriptLanguage::CodeCompletionOption> *r_options, bool &r_force);
