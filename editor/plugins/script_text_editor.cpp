@@ -2194,7 +2194,9 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 
 	// assign dragged exported variables after script chanes
 	if (dragged_export_refs.size() > 0) {
-		connect("edited_script_changed", callable_mp(this, &ScriptTextEditor::_assign_dragged_export_variables).bind(dragged_export_refs));
+		connect("edited_script_changed",
+				callable_mp(this, &ScriptTextEditor::_assign_dragged_export_variables).bind(dragged_export_refs),
+				CONNECT_ONE_SHOT);
 	}
 
 	// Remove drag caret before any actions so it is not included in undo.
@@ -2232,8 +2234,6 @@ void ScriptTextEditor::_assign_dragged_export_variables(const Dictionary &p_drag
 		Variant ref = p_dragged_export_refs.get_value_at_index(i);
 		sn->set(variable_name, ref);
 	}
-
-	disconnect("edited_script_changed", callable_mp(this, &ScriptTextEditor::_assign_dragged_export_variables));
 }
 
 void ScriptTextEditor::_text_edit_gui_input(const Ref<InputEvent> &ev) {
