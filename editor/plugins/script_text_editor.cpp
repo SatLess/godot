@@ -2047,6 +2047,17 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 				if (str_drop_modifier_pressed) {
 					parts.append(_get_dropped_resource_str_line(resource, is_empty_line, allow_uid));
 				} else if (ref_drop_modifier_pressed) {
+					Node *scene_root = get_tree()->get_edited_scene_root();
+					if (!scene_root) {
+						EditorNode::get_singleton()->show_warning(TTR("Can't assign @export variables without an open scene."));
+						return;
+					}
+
+					if (!ClassDB::is_parent_class(script->get_instance_base_type(), "Node")) {
+						EditorToaster::get_singleton()->popup_str(vformat(TTR("Can't assign @export variables because script '%s' does not inherit Node."), get_name()), EditorToaster::SEVERITY_WARNING);
+						return;
+					}
+
 					parts.append(_get_dropped_resource_ref_line(resource, dragged_export_refs));
 				}
 			} else {
@@ -2204,17 +2215,9 @@ void ScriptTextEditor::_assign_dragged_export_variables(const Dictionary &p_drag
 	ERR_FAIL_COND(p_dragged_export_refs.size() == 0);
 
 	Node *scene_root = get_tree()->get_edited_scene_root();
-	if (!scene_root) {
-		EditorNode::get_singleton()->show_warning(TTR("Can't assign @export variables without an open scene."));
-		disconnect("edited_script_changed", callable_mp(this, &ScriptTextEditor::_assign_dragged_export_variables));
-		return;
-	}
 
-	if (!ClassDB::is_parent_class(script->get_instance_base_type(), "Node")) {
-		EditorToaster::get_singleton()->popup_str(vformat(TTR("Can't assign @export variables because script '%s' does not inherit Node."), get_name()), EditorToaster::SEVERITY_WARNING);
-		disconnect("edited_script_changed", callable_mp(this, &ScriptTextEditor::_assign_dragged_export_variables));
-		return;
-	}
+	// Sanity check, should never be null
+	ERR_FAIL_COND(!scene_root);
 
 	Node *sn = _find_script_node(scene_root, scene_root, script);
 	if (!sn) {
