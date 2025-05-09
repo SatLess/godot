@@ -71,9 +71,7 @@ void IOSTerminalLogger::log_error(const char *p_function, const char *p_file, in
 	}
 
 	for (const Ref<ScriptBacktrace> &backtrace : p_script_backtraces) {
-		if (!backtrace->is_empty()) {
-			os_log_error(OS_LOG_DEFAULT, "%{public}s", backtrace->format().utf8().get_data());
-		}
+		os_log_error(OS_LOG_DEFAULT, "%{public}s", backtrace->format().utf8().get_data());
 	}
 }
 

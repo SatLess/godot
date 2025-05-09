@@ -33,6 +33,7 @@
 #include "tile_atlas_view.h"
 
 #include "core/os/thread.h"
+#include "scene/2d/tile_map.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/check_box.h"
 #include "scene/gui/flow_container.h"
@@ -45,7 +46,6 @@
 #include "scene/gui/tab_bar.h"
 #include "scene/gui/tree.h"
 
-class TileMapLayer;
 class TileMapLayerEditor;
 
 class TileMapLayerSubEditorPlugin : public Object {

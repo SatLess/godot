@@ -46,13 +46,14 @@ protected:
 	StringName tracker_name = "head";
 	StringName pose_name = SceneStringName(default_);
 	Ref<XRPositionalTracker> tracker;
+	Transform3D pose_offset;
 
 	void _bind_tracker();
 	void _unbind_tracker();
 	void _changed_tracker(const StringName &p_tracker_name, int p_tracker_type);
 	void _removed_tracker(const StringName &p_tracker_name, int p_tracker_type);
 	void _pose_changed(const Ref<XRPose> &p_pose);
-	virtual void _physics_interpolated_changed() override;
+	void _notification(int p_what);
 
 public:
 	PackedStringArray get_configuration_warnings() const override;
@@ -80,6 +81,7 @@ private:
 	StringName pose_name = SceneStringName(default_);
 	bool has_tracking_data = false;
 	bool show_when_tracked = false;
+	Transform3D pose_offset;
 
 protected:
 	Ref<XRPositionalTracker> tracker;
@@ -96,7 +98,7 @@ protected:
 	void _set_has_tracking_data(bool p_has_tracking_data);
 
 	void _update_visibility();
-	virtual void _physics_interpolated_changed() override;
+	void _notification(int p_what);
 
 public:
 	void _validate_property(PropertyInfo &p_property) const;
@@ -151,6 +153,9 @@ public:
 	Vector2 get_vector2(const StringName &p_name) const;
 
 	XRPositionalTracker::TrackerHand get_tracker_hand() const;
+
+	XRController3D() {}
+	~XRController3D() {}
 };
 
 /*
@@ -170,6 +175,9 @@ protected:
 public:
 	Vector3 get_size() const;
 	Plane get_plane() const;
+
+	XRAnchor3D() {}
+	~XRAnchor3D() {}
 };
 
 /*
@@ -203,4 +211,7 @@ public:
 
 	void set_current(bool p_enabled);
 	bool is_current() const;
+
+	XROrigin3D() {}
+	~XROrigin3D() {}
 };

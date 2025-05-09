@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  embedded_debugger.h                                                   */
+/*  navigation_mesh_editor_plugin.h                                       */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -30,41 +30,51 @@
 
 #pragma once
 
-#include "core/templates/hash_map.h"
-#include "core/variant/array.h"
+#include "editor/plugins/editor_plugin.h"
 
-class DisplayServerEmbedded;
+class AcceptDialog;
+class Button;
+class HBoxContainer;
+class Label;
+class NavigationRegion3D;
 
-/// @brief Singleton class to process embedded debugging message in the child process.
-class EmbeddedDebugger {
-	inline static EmbeddedDebugger *singleton = nullptr;
+class NavigationMeshEditor : public Control {
+	friend class NavigationMeshEditorPlugin;
 
-	EmbeddedDebugger(DisplayServerEmbedded *p_ds);
+	GDCLASS(NavigationMeshEditor, Control);
 
-public:
-	static void initialize(DisplayServerEmbedded *p_ds);
-	static void deinitialize();
+	AcceptDialog *err_dialog = nullptr;
 
-	~EmbeddedDebugger();
+	HBoxContainer *bake_hbox = nullptr;
+	Button *button_bake = nullptr;
+	Button *button_reset = nullptr;
+	Label *bake_info = nullptr;
 
-#ifdef DEBUG_ENABLED
-private:
-	DisplayServerEmbedded *ds;
+	NavigationRegion3D *node = nullptr;
 
-	/// Message handler function for parse_message.
-	typedef Error (EmbeddedDebugger::*ParseMessageFunc)(const Array &p_args);
-	static HashMap<String, ParseMessageFunc> parse_message_handlers;
-	static void _init_parse_message_handlers();
+	void _bake_pressed();
+	void _clear_pressed();
 
-	Error _msg_window_size(const Array &p_args);
-	Error _msg_mouse_set_mode(const Array &p_args);
-	Error _msg_event(const Array &p_args);
-	Error _msg_win_event(const Array &p_args);
-	Error _msg_ime_update(const Array &p_args);
-	Error _msg_joy_add(const Array &p_args);
-	Error _msg_joy_del(const Array &p_args);
+protected:
+	void _node_removed(Node *p_node);
+	void _notification(int p_what);
 
 public:
-	static Error parse_message(void *p_user, const String &p_msg, const Array &p_args, bool &r_captured);
-#endif
+	void edit(NavigationRegion3D *p_nav_region);
+	NavigationMeshEditor();
+};
+
+class NavigationMeshEditorPlugin : public EditorPlugin {
+	GDCLASS(NavigationMeshEditorPlugin, EditorPlugin);
+
+	NavigationMeshEditor *navigation_mesh_editor = nullptr;
+
+public:
+	virtual String get_plugin_name() const override { return "NavigationMesh"; }
+	bool has_main_screen() const override { return false; }
+	virtual void edit(Object *p_object) override;
+	virtual bool handles(Object *p_object) const override;
+	virtual void make_visible(bool p_visible) override;
+
+	NavigationMeshEditorPlugin();
 };

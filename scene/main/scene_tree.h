@@ -77,6 +77,8 @@ public:
 	bool is_ignoring_time_scale();
 
 	void release_connections();
+
+	SceneTreeTimer();
 };
 
 class SceneTree : public MainLoop {

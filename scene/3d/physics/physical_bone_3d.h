@@ -156,6 +156,8 @@ public:
 		virtual void _get_property_list(List<PropertyInfo> *p_list) const;
 
 		SixDOFAxisData axis_data[3];
+
+		SixDOFJointData() {}
 	};
 
 private:

@@ -58,4 +58,6 @@ protected:
 
 public:
 	PackedStringArray get_configuration_warnings() const override;
+
+	ShaderGlobalsOverride();
 };

@@ -89,4 +89,6 @@ public:
 	bool is_resizing() const {
 		return resizing;
 	}
+
+	GraphElement() {}
 };

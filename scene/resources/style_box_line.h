@@ -61,4 +61,7 @@ public:
 	float get_grow_end() const;
 
 	virtual void draw(RID p_canvas_item, const Rect2 &p_rect) const override;
+
+	StyleBoxLine();
+	~StyleBoxLine();
 };

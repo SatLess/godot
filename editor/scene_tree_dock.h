@@ -290,7 +290,6 @@ class SceneTreeDock : public VBoxContainer {
 
 	bool profile_allow_editing = true;
 	bool profile_allow_script_editing = true;
-	bool determine_path_automatically = true;
 
 	static void _update_configuration_warning();
 
