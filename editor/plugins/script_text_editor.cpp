@@ -2065,6 +2065,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 			}
 		}
 		text_to_drop = String(is_empty_line ? "\n" : ", ").join(parts);
+		text_to_drop += is_empty_line ? "\n" : "";
 	}
 
 	if (type == "nodes") {
