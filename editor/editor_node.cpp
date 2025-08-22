@@ -1838,7 +1838,7 @@ void EditorNode::gather_resources(const Variant &p_variant, List<Ref<Resource>> 
 	}
 }
 
-void EditorNode::update_resource_count(Node *p_node, bool p_remove) {
+void EditorNode::update_resource_count(Node *p_node, bool remove) {
 	if (!get_edited_scene()) {
 		return;
 	}
@@ -1849,7 +1849,7 @@ void EditorNode::update_resource_count(Node *p_node, bool p_remove) {
 	for (Ref<Resource> &R : res_list) {
 		List<Node *>::Element *E = resource_count[R].find(p_node);
 		if (E) {
-			if (p_remove) {
+			if (remove) {
 				resource_count[R].erase(E);
 			}
 		} else {
@@ -1870,10 +1870,10 @@ List<Node *> EditorNode::get_resource_node_list(Ref<Resource> p_res) {
 	return L == nullptr ? List<Node *>() : *L;
 }
 
-void EditorNode::update_node_reference(const Variant &p_value, Node *p_node, bool p_remove) {
+void EditorNode::update_node_reference(const Variant &p_variant, Node *p_node, bool remove) {
 	List<Ref<Resource>> list;
-	Ref<Resource> res = p_value;
-	gather_resources(p_value, list, true); //Gather all Resources and their SubResources to remove p_node from their lists.
+	Ref<Resource> res = p_variant;
+	gather_resources(p_variant, list, true); //Gather all Resources and their SubResources to remove p_node from their lists.
 
 	if (res.is_valid() && is_resource_internal_to_scene(res)) {
 		// Avoid external Resources from being added in.
@@ -1881,7 +1881,7 @@ void EditorNode::update_node_reference(const Variant &p_value, Node *p_node, boo
 	}
 
 	for (Ref<Resource> &R : list) {
-		if (!p_remove) {
+		if (!remove) {
 			resource_count[R].push_back(p_node);
 		} else {
 			List<Node *>::Element *E = resource_count[R].find(p_node);
