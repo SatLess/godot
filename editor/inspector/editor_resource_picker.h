@@ -63,6 +63,7 @@ class EditorResourcePicker : public HBoxContainer {
 
 	ConfirmationDialog *duplicate_resources_dialog = nullptr;
 	Tree *duplicate_resources_tree = nullptr;
+	Tree *rename_resource_tree = nullptr;
 
 	Size2i assign_button_min_size = Size2i(1, 1);
 
@@ -79,6 +80,7 @@ class EditorResourcePicker : public HBoxContainer {
 		OBJ_MENU_PASTE,
 		OBJ_MENU_PASTE_AS_UNIQUE,
 		OBJ_MENU_SHOW_IN_FILE_SYSTEM,
+		OBJ_MENU_RENAME,
 
 		TYPE_BASE_ID = 100,
 		CONVERT_BASE_ID = 1000,
@@ -104,6 +106,7 @@ class EditorResourcePicker : public HBoxContainer {
 	void _button_draw();
 	void _button_input(const Ref<InputEvent> &p_event);
 	void _unique_button_input(const Ref<InputEvent> &p_event);
+	virtual void shortcut_input(const Ref<InputEvent> &p_event) override;
 
 	String _get_owner_path() const;
 	String _get_resource_type(const Ref<Resource> &p_resource) const;
@@ -121,6 +124,8 @@ class EditorResourcePicker : public HBoxContainer {
 	void _duplicate_selected_resources();
 	bool _is_uniqueness_enabled(bool p_check_recursive = false);
 	Ref<Resource> _has_parent_resource();
+	void _perform_resource_rename();
+	void _cancel_resource_rename();
 
 protected:
 	virtual void _update_resource();
