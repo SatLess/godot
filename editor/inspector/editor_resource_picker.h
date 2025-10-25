@@ -31,6 +31,7 @@
 #pragma once
 
 #include "scene/gui/box_container.h"
+#include "scene/gui/line_edit.h"
 #include "scene/resources/material.h"
 
 class Button;
@@ -63,7 +64,7 @@ class EditorResourcePicker : public HBoxContainer {
 
 	ConfirmationDialog *duplicate_resources_dialog = nullptr;
 	Tree *duplicate_resources_tree = nullptr;
-	Tree *rename_resource_tree = nullptr;
+	LineEdit *rename_line = nullptr;
 
 	Size2i assign_button_min_size = Size2i(1, 1);
 
@@ -106,6 +107,7 @@ class EditorResourcePicker : public HBoxContainer {
 	void _button_draw();
 	void _button_input(const Ref<InputEvent> &p_event);
 	void _on_unique_button_pressed();
+	void shortcut_input(const Ref<InputEvent> &p_event);
 
 	String _get_owner_path() const;
 	String _get_resource_type(const Ref<Resource> &p_resource) const;
@@ -123,8 +125,8 @@ class EditorResourcePicker : public HBoxContainer {
 	void _duplicate_selected_resources();
 	bool _is_uniqueness_enabled(bool p_check_recursive = false);
 	Ref<Resource> _has_parent_resource();
-	void _perform_resource_rename();
-	void _cancel_resource_rename();
+	void _perform_resource_rename(String new_name);
+	void _clean_up_resource_rename(bool toggled_on);
 
 protected:
 	virtual void _update_resource();

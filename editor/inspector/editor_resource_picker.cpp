@@ -566,14 +566,16 @@ void EditorResourcePicker::_edit_menu_cbk(int p_which) {
 				return;
 			}
 			assign_button->set_visible(false);
-			rename_resource_tree->set_visible(true);
-			TreeItem *root = rename_resource_tree->get_root();
-			root->set_editable(0, true);
-			root->select(0);
-			root->set_as_cursor(0);
-			rename_resource_tree->ensure_cursor_is_visible();
-			rename_resource_tree->grab_focus();
-			callable_mp(rename_resource_tree, &Tree::edit_selected).bind(false).call_deferred();
+			rename_line = memnew(LineEdit);
+			rename_line->set_h_size_flags(SIZE_EXPAND_FILL);
+			add_child(rename_line);
+			move_child(rename_line, quick_load_button->get_index());
+			rename_line->set_text(edited_resource->get_name());
+			rename_line->select_all();
+			rename_line->grab_focus();
+			rename_line->connect(SNAME("text_submitted"), callable_mp(this, &EditorResourcePicker::_perform_resource_rename));
+			rename_line->connect(SNAME("editing_toggled"), callable_mp(this, &EditorResourcePicker::_clean_up_resource_rename));
+
 		} break;
 
 		default: {
@@ -1439,12 +1441,9 @@ Ref<Resource> EditorResourcePicker::_has_parent_resource() {
 	return nullptr;
 }
 
-void EditorResourcePicker::_perform_resource_rename() {
+void EditorResourcePicker::_perform_resource_rename(String new_name) {
 	EditorUndoRedoManager *undo_redo = EditorUndoRedoManager::get_singleton();
 	Resource *res = edited_resource.ptr();
-	String new_name = rename_resource_tree->get_root()->get_text(0);
-	rename_resource_tree->set_visible(false);
-	assign_button->set_visible(true);
 	undo_redo->create_action(TTR("Rename Node"), UndoRedo::MERGE_DISABLE, res);
 	undo_redo->add_undo_method(res, "set_name", res->get_name());
 	undo_redo->add_do_method(res, "set_name", new_name);
@@ -1452,8 +1451,11 @@ void EditorResourcePicker::_perform_resource_rename() {
 	_update_resource();
 }
 
-void EditorResourcePicker::_cancel_resource_rename() {
-	rename_resource_tree->set_visible(false);
+void EditorResourcePicker::_clean_up_resource_rename(bool toggled_on) {
+	if (toggled_on) {
+		return;
+	}
+	rename_line->queue_free();
 	assign_button->set_visible(true);
 }
 
@@ -1505,14 +1507,6 @@ EditorResourcePicker::EditorResourcePicker(bool p_hide_assign_button_controls) {
 	add_child(edit_button);
 	edit_button->connect(SceneStringName(pressed), callable_mp(this, &EditorResourcePicker::_update_menu));
 	edit_button->connect(SceneStringName(gui_input), callable_mp(this, &EditorResourcePicker::_button_input));
-
-	rename_resource_tree = memnew(Tree);
-	rename_resource_tree->create_item()->set_cell_mode(0, TreeItem::TreeCellMode::CELL_MODE_STRING);
-	add_child(rename_resource_tree);
-	rename_resource_tree->set_visible(false);
-	rename_resource_tree->set_h_size_flags(SIZE_EXPAND_FILL);
-	rename_resource_tree->connect(SNAME("item_edited"), callable_mp(this, &EditorResourcePicker::_perform_resource_rename));
-	rename_resource_tree->connect(SNAME("item_deselected"), callable_mp(this, &EditorResourcePicker::_cancel_resource_rename));
 
 	add_theme_constant_override("separation", 0);
 	set_process_shortcut_input(true);
