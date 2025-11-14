@@ -765,6 +765,9 @@ class EditorInspector : public ScrollContainer {
 
 	bool updating_theme = false;
 
+	List<Node *> selected_nodes_for_duplication;
+	bool separate_resource_copy = false; // Duplicates a Resource for each Node found in the 'MultiNodeEdit'.
+
 	struct DocCacheInfo {
 		String doc_path;
 		String theme_item_name;
